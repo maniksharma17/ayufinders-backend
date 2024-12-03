@@ -38,30 +38,6 @@ export const signinHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const signinWithGoogleHandler = async (req: Request, res: Response) => {
-  const userPayload = req.body;
-  
-  const user = await User.findOne({
-    email: userPayload.email,
-  });
-
-  if (user) {
-    const token = await jwt.sign({ user }, jwtsecret as string);
-
-    res.status(200).json({
-      message: "User signed in",
-      user: user,
-      token: token,
-    });
-  } else {
-    res.status(200).json({
-      message: "Incorrect email or password",
-      user: null,
-      token: null,
-    });
-  }
-};
-
 
 export const signupHandler = async (req: Request, res: Response) => {
   const userPayload = req.body;
@@ -80,12 +56,10 @@ export const signupHandler = async (req: Request, res: Response) => {
     const user = await User.create({
       name: userPayload.name,
       email: userPayload.email,
-      phone: userPayload.phone,
       password: userPayload.password,
-      country: userPayload.country
     });
 
-    res.status(200).json({
+    res.status(201).json({
       message: "User created",
       user: user,
     });

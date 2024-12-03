@@ -4,6 +4,8 @@ import cors from "cors"
 import mongoose from "mongoose"
 import bodyParser from "body-parser"
 import userRouter from './routes/user.js'
+import quizRouter from './routes/quiz.js'
+import tagRouter from './routes/tag.js'
 
 // CONFIG
 dotenv.config()
@@ -22,6 +24,8 @@ app.use(bodyParser.urlencoded({extended: false }))
 
 // ROUTES
 app.use('/api/v1/user', userRouter)
+app.use('/api/v1/quiz', quizRouter)
+app.use('/api/v1/tag', tagRouter)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, ()=>{
