@@ -58,11 +58,81 @@ export const addQuestionHandler = async (req: Request, res: Response) => {
     category.questions.push(question._id);
     await category.save();
 
-    res.status(201).json({ success: true, data: question });
+    // Add the question to each tag in the tagId array
+    if (Array.isArray(tagId)) {
+      await Promise.all(
+        tagId.map(async (id: string) => {
+          const tag = await Tag.findById(id);
+          if (tag) {
+            tag.questions.push(question._id);
+            await tag.save();
+          }
+        })
+      );
+    } else {
+      const tag = await Tag.findById(tagId);
+      if (tag) {
+        tag.questions.push(question._id);
+        await tag.save();
+      }
+    }
+
+    res.status(200).json({ success: true, data: question });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error", error });
   }
 };
+
+export const updateQuestionHandler = async (req: Request, res: Response) => {
+  const { questionId } = req.params;
+  const { text, options, reference, correctOption, explanation, tagId } = req.body;
+
+  if (!text || !options || !tagId || options.length < 4) {
+    res.status(400).json({
+      success: false,
+      message: "Quiz ID, question text, and at least four options are required.",
+    });
+    return;
+  }
+
+  try {
+    const question = await Question.findById(questionId);
+    if (!question) {
+      res.status(404).json({ success: false, message: "Question not found" });
+      return;
+    }
+    const updatedQuestion = await Question.findByIdAndUpdate(
+      questionId,
+      { text, options, reference, correctOption, explanation, tagId },
+      { new: true }
+    );
+
+    // Add the question to each tag in the tagId array
+    if (Array.isArray(tagId)) {
+      await Promise.all(
+        tagId.map(async (id: string) => {
+          const tag = await Tag.findById(id);
+          if (tag) {
+            tag.questions.push(question._id);
+            await tag.save();
+          }
+        })
+      );
+    } else {
+      const tag = await Tag.findById(tagId);
+      if (tag) {
+        tag.questions.push(question._id);
+        await tag.save();
+      }
+    }
+
+    res.status(200).json({ success: true, data: updatedQuestion });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error", error });
+  }
+};
+
+
 
 export const addCategoryHandler = async (req: Request, res: Response) => {
   const { name, description } = req.body;
@@ -132,3 +202,27 @@ export const deleteQuestionHandler = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: "Server Error", error });
   }
 };
+
+type QuestionType = {
+  _id: string,
+  text: string,
+  options: OptionType[],
+  correctOption: number,
+  explanation?: string,
+  reference: {
+    title?: string,
+    link?: string
+  },
+  categoryId: string,
+  tagId: TagType[]
+}
+
+type OptionType = {
+  text: string
+}
+type TagType = {
+  _id: string,
+  name: string,
+  description: string,
+  questions: QuestionType[]
+}
