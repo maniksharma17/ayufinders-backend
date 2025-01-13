@@ -6,7 +6,6 @@ import dotenv from "dotenv"
 import Admin from "../models/admin.js";
 dotenv.config()
 const jwtsecret = process.env.JWT_SECRET
-import { setCookie } from 'nookies';
 
 
 export const signinHandler = async (req: Request, res: Response) => {
@@ -91,13 +90,7 @@ export const adminSigninHandler = async (req: Request, res: Response) => {
     const token = await jwt.sign({ admin }, jwtsecret as string);
 
     // Set the token in the cookie
-    setCookie({ res }, 'authToken', token, {
-      maxAge: 24 * 60 * 60,  // 24 hours in seconds
-      path: '/',
-      secure: process.env.NODE_ENV === 'production', 
-      httpOnly: true,  // Make sure it's secure,
-      sameSite: 'lax'
-    });
+    res.setHeader('Set-Cookie', `authToken=${token}; Path=/; Max-Age=86400; HttpOnly; Secure; SameSite=Lax`);
 
     res.status(200).json({
       message: "Admin signed in",
