@@ -3,8 +3,10 @@ import jwt from "jsonwebtoken";
 import { userSigninSchema, userSignupSchema } from "../schema/user.js";
 import { Request, Response } from "express";
 import dotenv from "dotenv"
+import Admin from "../models/admin.js";
 dotenv.config()
 const jwtsecret = process.env.JWT_SECRET
+import { setCookie } from 'nookies';
 
 
 export const signinHandler = async (req: Request, res: Response) => {
@@ -70,3 +72,56 @@ export const signupHandler = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const adminSigninHandler = async (req: Request, res: Response) => {
+  const userPayload = req.body;
+  const isValid = userSigninSchema.safeParse(userPayload);
+
+  if (!isValid.success) {
+    res.json({ message: "Invalid email or password" });
+    return;
+  }
+
+  const admin = await Admin.findOne({
+    email: userPayload.email,
+    password: userPayload.password,
+  });
+
+  if (admin) {
+    const token = await jwt.sign({ admin }, jwtsecret as string);
+
+    // Set the token in the cookie
+    setCookie({ res }, 'authToken', token, {
+      maxAge: 24 * 60 * 60,  // 24 hours in seconds
+      path: '/',
+      secure: process.env.NODE_ENV === 'production', 
+      httpOnly: true,  // Make sure it's secure,
+      sameSite: 'lax'
+    });
+
+    res.status(200).json({
+      message: "Admin signed in",
+      admin: admin,
+      token: token,
+    });
+  } else {
+    res.status(200).json({
+      message: "Incorrect email or password",
+      user: null,
+      token: null,
+    });
+  }
+};
+
+export const adminLogoutHandler = (req: Request, res: Response) => {
+  // Clear the authentication cookie
+  res.clearCookie('authToken', {
+    httpOnly: true, // Ensure the cookie is not accessible via JavaScript
+    secure: true,   // Ensure the cookie is sent only over HTTPS
+    sameSite: 'strict', // Protect against CSRF attacks
+    path: '/', // Apply to all paths
+  });
+
+  // Send response to confirm logout
+  res.status(200).json({ message: 'Logout successful' });
+}

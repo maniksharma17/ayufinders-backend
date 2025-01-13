@@ -35,7 +35,11 @@ const QuestionSchema = new mongoose.Schema({
   tagId: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Tag"
-  }]
+  }],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin"
+  }
 }, {
   timestamps: true,  
 });

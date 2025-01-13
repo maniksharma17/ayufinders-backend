@@ -19,7 +19,7 @@ export const getQuizByCategoryIdHandler = async (req: Request, res: Response) =>
   const { categoryId } = req.params;
 
   try {
-    const quiz = await Question.find({ categoryId: categoryId }).populate("tagId");
+    const quiz = await Question.find({ categoryId: categoryId }).populate("tagId").populate("createdBy");
 
     if (!quiz) {
       res.status(404).json({ success: false, message: "Quiz not found" });
@@ -57,6 +57,8 @@ export const addQuestionHandler = async (req: Request, res: Response) => {
     // Add the question to the category
     category.questions.push(question._id);
     await category.save();
+
+    
 
     // Add the question to each tag in the tagId array
     if (Array.isArray(tagId)) {

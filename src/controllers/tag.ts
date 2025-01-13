@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import Tag from "../models/tag.js";
+import Question from "../models/question.js";
+import SubjectTopic from "../models/subjectTopic.js";
 
 export const addTagHandler = async (req: Request, res: Response) => {
   const { name, description } = req.body;
@@ -20,7 +22,7 @@ export const addTagHandler = async (req: Request, res: Response) => {
 
 export const getTagsHandler = async (req: Request, res: Response) => {
   try {
-    const tags = await Tag.find();
+    const tags = await Tag.find().populate("createdBy");
     res.status(200).json({ success: true, tags: tags });
 
   } catch (error) {
@@ -38,6 +40,18 @@ export const deleteTagHandler = async (req: Request, res: Response) => {
       return;
     }
     const deletedTag = await Tag.deleteOne({_id: tagId})
+
+    // Remove the tagId from all Question documents
+    await Question.updateMany(
+      { tagId: tagId },
+      { $pull: { tagId: tagId } }
+    );
+
+    await SubjectTopic.updateMany(
+      { tagId: tagId },
+      { $pull: { tagId: tagId } }
+    )
+
     res.status(200).json({ success: true, tag: deletedTag });
 
   } catch (error) {

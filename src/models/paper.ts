@@ -1,29 +1,28 @@
 import mongoose from "mongoose";
 
-const TagSchema = new mongoose.Schema({
+const PaperSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
+    unique: false
   },
   description: {
     type: String,
     default: "",
   },
-  questions: [
+  subjectTopics: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Question",
+      ref: "SubjectTopics",
     },
   ],
-  createdBy: {
+  subjectId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Admin",
+    ref: "Subject"
   }
-  
 }, {
   timestamps: true,  
 });
 
-const Tag = mongoose.model("Tag", TagSchema);
-export default Tag;
+const Paper = mongoose.model("Paper", PaperSchema);
+export default Paper;
