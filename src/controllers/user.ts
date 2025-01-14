@@ -108,12 +108,11 @@ export const adminSigninHandler = async (req: Request, res: Response) => {
 
 export const adminLogoutHandler = (req: Request, res: Response) => {
   // Clear the authentication cookie
-  res.clearCookie('authToken', {
-    httpOnly: true, // Ensure the cookie is not accessible via JavaScript
-    secure: true,   // Ensure the cookie is sent only over HTTPS
-    sameSite: 'strict', // Protect against CSRF attacks
-    path: '/', // Apply to all paths
-  });
+  res.setHeader(
+    'Set-Cookie',
+    'authToken=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None; Domain=.ayufinders.com'
+  );
+  
 
   // Send response to confirm logout
   res.status(200).json({ message: 'Logout successful' });
