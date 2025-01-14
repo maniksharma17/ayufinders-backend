@@ -90,7 +90,7 @@ export const adminSigninHandler = async (req: Request, res: Response) => {
     const token = await jwt.sign({ admin }, jwtsecret as string);
 
     // Set the token in the cookie
-    res.setHeader('Set-Cookie', `authToken=${token}; Path=/; Max-Age=86400; HttpOnly; Secure; SameSite=None, Domain=.ayufinders.com`);
+    res.setHeader('Set-Cookie', `authToken=${token}; Path=/; Max-Age=86400; HttpOnly; Secure; SameSite=None; Domain=.ayufinders.com`);
 
     res.status(200).json({
       message: "Admin signed in",
