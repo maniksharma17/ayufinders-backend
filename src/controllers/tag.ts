@@ -4,7 +4,7 @@ import Question from "../models/question.js";
 import SubjectTopic from "../models/subjectTopic.js";
 
 export const addTagHandler = async (req: Request, res: Response) => {
-  const { name, description } = req.body;
+  const { name, description, createdBy } = req.body;
 
   try {
     const existingTag = await Tag.findOne({name})
@@ -12,7 +12,7 @@ export const addTagHandler = async (req: Request, res: Response) => {
       res.status(200).json({ success: false, tag: null});
       return;
     }
-    const newTag = await Tag.create({ name, description });
+    const newTag = await Tag.create({ name, description, createdBy });
     res.status(201).json({ success: true, tag: newTag });
 
   } catch (error) {

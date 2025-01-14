@@ -34,7 +34,7 @@ export const getQuizByCategoryIdHandler = async (req: Request, res: Response) =>
 
 export const addQuestionHandler = async (req: Request, res: Response) => {
   const { categoryId } = req.params;
-  const { text, options, reference, correctOption, explanation, tagId } = req.body;
+  const { text, options, reference, correctOption, explanation, tagId, createdBy } = req.body;
 
   if (!categoryId || !text || !options || !tagId || options.length < 4) {
     res.status(400).json({
@@ -52,7 +52,7 @@ export const addQuestionHandler = async (req: Request, res: Response) => {
     }
 
     // Create the new question
-    const question = await Question.create({ text, options, categoryId, reference, correctOption, explanation, tagId });
+    const question = await Question.create({ text, options, categoryId, reference, correctOption, explanation, tagId, createdBy });
 
     // Add the question to the category
     category.questions.push(question._id);
