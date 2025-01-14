@@ -58,8 +58,6 @@ export const addQuestionHandler = async (req: Request, res: Response) => {
     category.questions.push(question._id);
     await category.save();
 
-    
-
     // Add the question to each tag in the tagId array
     if (Array.isArray(tagId)) {
       await Promise.all(
