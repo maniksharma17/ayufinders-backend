@@ -153,6 +153,24 @@ export const addCategoryHandler = async (req: Request, res: Response) => {
   }
 };
 
+export const updateCategoryHandler = async (req: Request, res: Response) => {
+  const { name, description } = req.body;
+  const { categoryId } = req.params;
+
+  try {
+    const existingCategory = await Category.findById(categoryId);
+    if(!existingCategory){
+      res.status(200).json({ success: false, category: null });
+      return;
+    }
+    const updatedCategory = await Category.findByIdAndUpdate(categoryId, { name, description });
+    res.status(201).json({ success: true, category: updatedCategory });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error", error });
+  }
+};
+
 export const deleteCategoryHandler = async (req: Request, res: Response) => {
   const { categoryId } = req.params;
 

@@ -20,6 +20,24 @@ export const addTagHandler = async (req: Request, res: Response) => {
   }
 };
 
+export const updateTagHandler = async (req: Request, res: Response) => {
+  const { name, description } = req.body;
+  const { tagId } = req.params;
+
+  try {
+    const existingTag = await Tag.findById(tagId)
+    if(!existingTag){
+      res.status(200).json({ success: false, tag: null, message: "Tag does not exist."});
+      return;
+    }
+    const updatedTag = await Tag.findByIdAndUpdate(tagId, { name, description });
+    res.status(201).json({ success: true, tag: updatedTag });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error", error });
+  }
+};
+
 export const getTagsHandler = async (req: Request, res: Response) => {
   try {
     const tags = await Tag.find().populate("createdBy");
