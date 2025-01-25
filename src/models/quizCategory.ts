@@ -10,6 +10,10 @@ const QuizCategorySchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  year: {
+    type: String,
+    enum: ["1","2","3"]
+  },
   questions: [
     {
       type: mongoose.Schema.Types.ObjectId,

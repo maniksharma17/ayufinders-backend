@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const PaperSchema = new mongoose.Schema({
+const PaperSectionSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -16,19 +16,13 @@ const PaperSchema = new mongoose.Schema({
       ref: "SubjectTopics",
     },
   ],
-  section: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "PaperSection",
-    }
-  ],
-  subjectId: {
+  paperId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Subject"
+    ref: "Paper"
   }
 }, {
   timestamps: true,  
 });
 
-const Paper = mongoose.model("Paper", PaperSchema);
-export default Paper;
+const PaperSection = mongoose.model("PaperSection", PaperSectionSchema);
+export default PaperSection;

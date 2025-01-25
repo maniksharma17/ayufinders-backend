@@ -1,13 +1,6 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose from 'mongoose';
 
-export interface ISubjectTopic extends Document {
-  name: string;
-  description: string;
-  tagId: mongoose.Types.ObjectId[];  // Array of ObjectIds referencing the Tag model
-  paperId: mongoose.Types.ObjectId;
-}
-
-const SubjectTopicSchema: Schema<ISubjectTopic> = new mongoose.Schema({
+const SubjectTopicSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -17,18 +10,25 @@ const SubjectTopicSchema: Schema<ISubjectTopic> = new mongoose.Schema({
     type: String,
     default: "",
   },
+  year: {
+    type: String,
+    enum: ['1','2','3']
+  },
+  subTopics: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SubTopic",
+  }],
   paperId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Paper",
-    required: true
   },
-  tagId: [{
+  paperSectionId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Tag"
-  }]
+    ref: "PaperSection",
+  },
 }, {
   timestamps: true,  
 });
 
-const SubjectTopic = mongoose.model<ISubjectTopic>("SubjectTopic", SubjectTopicSchema);
+const SubjectTopic = mongoose.model("SubjectTopic", SubjectTopicSchema);
 export default SubjectTopic;

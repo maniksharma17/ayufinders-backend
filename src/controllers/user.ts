@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import { userSigninSchema, userSignupSchema } from "../schema/user.js";
 import { Request, Response } from "express";
 import dotenv from "dotenv"
-import Admin from "../models/admin.js";
 dotenv.config()
 const jwtsecret = process.env.JWT_SECRET
 
@@ -72,48 +71,3 @@ export const signupHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const adminSigninHandler = async (req: Request, res: Response) => {
-  const userPayload = req.body;
-  const isValid = userSigninSchema.safeParse(userPayload);
-
-  if (!isValid.success) {
-    res.json({ message: "Invalid email or password" });
-    return;
-  }
-
-  const admin = await Admin.findOne({
-    email: userPayload.email,
-    password: userPayload.password,
-  });
-
-  if (admin) {
-    const token = await jwt.sign({ admin }, jwtsecret as string);
-
-    // Set the token in the cookie
-    res.setHeader('Set-Cookie', `authToken=${token}; Path=/; Max-Age=86400; HttpOnly; Secure; SameSite=None; Domain=.ayufinders.com`);
-
-    res.status(200).json({
-      message: "Admin signed in",
-      admin: admin,
-      token: token,
-    });
-  } else {
-    res.status(200).json({
-      message: "Incorrect email or password",
-      user: null,
-      token: null,
-    });
-  }
-};
-
-export const adminLogoutHandler = (req: Request, res: Response) => {
-  // Clear the authentication cookie
-  res.setHeader(
-    'Set-Cookie',
-    'authToken=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None; Domain=.ayufinders.com'
-  );
-  
-
-  // Send response to confirm logout
-  res.status(200).json({ message: 'Logout successful' });
-}

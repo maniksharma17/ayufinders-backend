@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Tag from "../models/tag.js";
 import Question from "../models/question.js";
-import SubjectTopic from "../models/subjectTopic.js";
+import SubTopic from "../models/subTopic.js";
 
 export const addTagHandler = async (req: Request, res: Response) => {
   const { name, description, createdBy } = req.body;
@@ -61,12 +61,12 @@ export const deleteTagHandler = async (req: Request, res: Response) => {
 
     // Remove the tagId from all Question documents
     await Question.updateMany(
-      { tagId: tagId },
+      { tagId: { $in: tagId } },
       { $pull: { tagId: tagId } }
     );
 
-    await SubjectTopic.updateMany(
-      { tagId: tagId },
+    await SubTopic.updateMany(
+      { tagId: { $in: tagId } },
       { $pull: { tagId: tagId } }
     )
 

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Paper from "../models/paper.js";
+import Subject from "../models/subject.js";
 
 export const getPapersBySubjectIdHandler = async (req: Request, res: Response) => {
   const { subjectId } = req.params;
@@ -45,6 +46,12 @@ export const addPaperHandler = async (req: Request, res: Response) => {
       return;
     }
     const newPaper = await Paper.create({ name, description, subjectId });
+
+    await Subject.findByIdAndUpdate(
+      subjectId,
+      {$push: {paper: newPaper._id}}
+    )
+
     res.status(201).json({ success: true, data: newPaper });
 
   } catch (error) {
@@ -82,6 +89,12 @@ export const deletePaperHandler = async (req: Request, res: Response) => {
       return;
     }
     const deletedPaper = await Paper.deleteOne({ _id: paperId });
+
+    await Subject.updateOne(
+      {paper: {$in: paperId}},
+      {$pull: {paper: paperId}}
+    )
+
     res.status(200).json({ success: true, data: deletedPaper });
 
   } catch (error) {

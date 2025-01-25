@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import SubjectTopic from "../models/subjectTopic.js";
 import Question from "../models/question.js";
+import Paper from "../models/paper.js";
+import PaperSection from "../models/paperSection.js";
 
 export const getTopicsByPaperIdHandler = async (req: Request, res: Response) => {
   const { paperId } = req.params;
@@ -19,28 +21,9 @@ export const getTopicsByPaperIdHandler = async (req: Request, res: Response) => 
   }
 };
 
-export const getTopicsInfoByIdHandler = async (req: Request, res: Response) => {
-  const { topicId } = req.params;
-
-  try {
-    const topic = await SubjectTopic.findById(topicId).exec()
-
-    if (!topic) {
-      res.status(404).json({ success: false, data: "Topic Data not found" });
-      return;
-    }
-
-    // Fetch questions related to the tags in this SubjectTopic
-    const questions = await Question.find({ tagId: { $in: topic.tagId } }).populate('tagId').exec();
-
-    res.status(200).json({ success: true, data: {topic, questions} });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Server Error", error });
-  }
-};
 
 export const addSubjectTopicHandler = async (req: Request, res: Response) => {
-  const { name, description, paperId, tagId } = req.body;
+  const { name, description, paperId, paperSectionId, year } = req.body;
 
   try {
     const exisitingTopic = await SubjectTopic.findOne({name, paperId});
@@ -48,7 +31,20 @@ export const addSubjectTopicHandler = async (req: Request, res: Response) => {
       res.status(200).json({ success: false, data: null });
       return;
     }
-    const newTopic = await SubjectTopic.create({ name, description, paperId, tagId });
+    const newTopic = await SubjectTopic.create({ name, description, paperId, paperSectionId, year });
+
+    await Paper.findByIdAndUpdate(
+      paperId,
+      { $push: { subjectTopics: newTopic._id } },
+      { new: true } // Return the updated document
+    );
+
+    await PaperSection.findByIdAndUpdate(
+      paperSectionId,
+      { $push: { subjectTopics: newTopic._id } },
+      { new: true } // Return the updated document
+    );
+
     res.status(201).json({ success: true, data: newTopic });
 
   } catch (error) {
@@ -57,7 +53,7 @@ export const addSubjectTopicHandler = async (req: Request, res: Response) => {
 };
 
 export const updateSubjectTopicHandler = async (req: Request, res: Response) => {
-  const { name, description, paperId, tagId } = req.body;
+  const { name, description } = req.body;
   const { topicId } = req.params;
 
   try {
@@ -67,7 +63,7 @@ export const updateSubjectTopicHandler = async (req: Request, res: Response) => 
       return;
     }
     const updatedTopic = await SubjectTopic.findByIdAndUpdate( topicId, { 
-      name, description, paperId, tagId 
+      name, description 
     });
 
     res.status(201).json({ success: true, data: updatedTopic });
@@ -87,7 +83,19 @@ export const deleteSubjectTopicHandler = async (req: Request, res: Response) => 
       res.status(404).json({ success: false, data: "Topic not found" });
       return;
     }
-    const deletedTopic = await SubjectTopic.deleteOne({ _id: topicId });
+    const deletedTopic = await SubjectTopic.findByIdAndDelete(topicId);
+
+    await Paper.updateOne(
+      {subjectTopics: {$in: topicId}},
+      {$pull: { subjectTopics: topicId }},
+    );
+
+    await PaperSection.updateOne(
+      {subjectTopics: {$in: topicId}},
+      {$pull: { subjectTopics: topicId }},
+    );
+
+
     res.status(200).json({ success: true, data: deletedTopic });
 
   } catch (error) {

@@ -3,23 +3,31 @@ import Category from "../models/quizCategory.js";
 import Question from "../models/question.js";
 import Tag from "../models/tag.js";
 
-export const getAllQuizCategoriesHandler = async (req: Request, res: Response) => {
-  try{
+export const getAllQuizCategoriesHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
     const quizCategories = await Category.find();
     if (!quizCategories) {
       res.status(404).json({ success: false, message: "Categories not found" });
     }
     res.status(200).json({ success: true, quizCategories: quizCategories });
-  } catch(error){
-    console.error(error)
+  } catch (error) {
+    console.error(error);
   }
-}
+};
 
-export const getQuizByCategoryIdHandler = async (req: Request, res: Response) => {
+export const getQuizByCategoryIdHandler = async (
+  req: Request,
+  res: Response
+) => {
   const { categoryId } = req.params;
 
   try {
-    const quiz = await Question.find({ categoryId: categoryId }).populate("tagId").populate("createdBy");
+    const quiz = await Question.find({ categoryId: categoryId })
+      .populate("tagId")
+      .populate("createdBy");
 
     if (!quiz) {
       res.status(404).json({ success: false, message: "Quiz not found" });
@@ -34,12 +42,25 @@ export const getQuizByCategoryIdHandler = async (req: Request, res: Response) =>
 
 export const addQuestionHandler = async (req: Request, res: Response) => {
   const { categoryId } = req.params;
-  const { text, options, reference, correctOption, explanation, tagId, createdBy } = req.body;
+  const {
+    text,
+    textHindi,
+    options,
+    optionsHindi,
+    reference,
+    referenceHindi,
+    correctOption,
+    explanation,
+    explanationHindi,
+    tagId,
+    createdBy,
+  } = req.body;
 
   if (!categoryId || !text || !options || !tagId || options.length < 4) {
     res.status(400).json({
       success: false,
-      message: "Quiz ID, question text, and at least four options are required.",
+      message:
+        "Quiz ID, question text, and at least four options are required.",
     });
     return;
   }
@@ -52,7 +73,20 @@ export const addQuestionHandler = async (req: Request, res: Response) => {
     }
 
     // Create the new question
-    const question = await Question.create({ text, options, categoryId, reference, correctOption, explanation, tagId, createdBy });
+    const question = await Question.create({
+      text,
+      textHindi,
+      options,
+      optionsHindi,
+      categoryId,
+      reference,
+      referenceHindi,
+      correctOption,
+      explanation,
+      explanationHindi,
+      tagId,
+      createdBy
+    });
 
     // Add the question to the category
     category.questions.push(question._id);
@@ -85,12 +119,14 @@ export const addQuestionHandler = async (req: Request, res: Response) => {
 
 export const updateQuestionHandler = async (req: Request, res: Response) => {
   const { questionId } = req.params;
-  const { text, options, reference, correctOption, explanation, tagId } = req.body;
+  const { text, textHindi, options, optionsHindi, reference, referenceHindi, correctOption, explanation, explanationHindi, tagId } =
+    req.body;
 
   if (!text || !options || !tagId || options.length < 4) {
     res.status(400).json({
       success: false,
-      message: "Quiz ID, question text, and at least four options are required.",
+      message:
+        "Quiz ID, question text, and at least four options are required.",
     });
     return;
   }
@@ -103,7 +139,7 @@ export const updateQuestionHandler = async (req: Request, res: Response) => {
     }
     const updatedQuestion = await Question.findByIdAndUpdate(
       questionId,
-      { text, options, reference, correctOption, explanation, tagId },
+      { text, textHindi, options, optionsHindi, reference, referenceHindi, correctOption, explanation, explanationHindi, tagId },
       { new: true }
     );
 
@@ -132,20 +168,17 @@ export const updateQuestionHandler = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const addCategoryHandler = async (req: Request, res: Response) => {
-  const { name, description } = req.body;
+  const { name, description, year } = req.body;
 
   try {
-    const existingCategory = await Category.findOne({name});
-    if(existingCategory){
+    const existingCategory = await Category.findOne({ name });
+    if (existingCategory) {
       res.status(200).json({ success: false, category: null });
       return;
     }
-    const newCategory = await Category.create({ name, description });
+    const newCategory = await Category.create({ name, description, year });
     res.status(201).json({ success: true, category: newCategory });
-
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error", error });
   }
@@ -157,13 +190,15 @@ export const updateCategoryHandler = async (req: Request, res: Response) => {
 
   try {
     const existingCategory = await Category.findById(categoryId);
-    if(!existingCategory){
+    if (!existingCategory) {
       res.status(200).json({ success: false, category: null });
       return;
     }
-    const updatedCategory = await Category.findByIdAndUpdate(categoryId, { name, description });
+    const updatedCategory = await Category.findByIdAndUpdate(categoryId, {
+      name,
+      description,
+    });
     res.status(201).json({ success: true, category: updatedCategory });
-
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error", error });
   }
@@ -174,13 +209,12 @@ export const deleteCategoryHandler = async (req: Request, res: Response) => {
 
   try {
     const existingCategory = await Category.findById(categoryId);
-    if(!existingCategory){
+    if (!existingCategory) {
       res.status(404).json({ success: false, message: "Category not found" });
       return;
     }
     const deletedCategory = await Category.deleteOne({ _id: categoryId });
     res.status(200).json({ success: true, category: deletedCategory });
-
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error", error });
   }
@@ -190,8 +224,8 @@ export const deleteQuestionHandler = async (req: Request, res: Response) => {
   const { questionId } = req.params;
 
   try {
-    const existingQuestion = await Question.findOne({_id: questionId});
-    if(!existingQuestion){
+    const existingQuestion = await Question.findOne({ _id: questionId });
+    if (!existingQuestion) {
       res.status(200).json({ success: false, question: null });
       return;
     }
@@ -215,32 +249,31 @@ export const deleteQuestionHandler = async (req: Request, res: Response) => {
       message: "Question deleted successfully",
       question: deletedQuestion,
     });
-
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error", error });
   }
 };
 
 type QuestionType = {
-  _id: string,
-  text: string,
-  options: OptionType[],
-  correctOption: number,
-  explanation?: string,
+  _id: string;
+  text: string;
+  options: OptionType[];
+  correctOption: number;
+  explanation?: string;
   reference: {
-    title?: string,
-    link?: string
-  },
-  categoryId: string,
-  tagId: TagType[]
-}
+    title?: string;
+    link?: string;
+  };
+  categoryId: string;
+  tagId: TagType[];
+};
 
 type OptionType = {
-  text: string
-}
+  text: string;
+};
 type TagType = {
-  _id: string,
-  name: string,
-  description: string,
-  questions: QuestionType[]
-}
+  _id: string;
+  name: string;
+  description: string;
+  questions: QuestionType[];
+};

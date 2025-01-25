@@ -5,10 +5,10 @@ const router = express.Router()
 router.get('/', getAllQuizCategoriesHandler)
 router.get('/:categoryId', getQuizByCategoryIdHandler)
 router.post('/', addCategoryHandler)
-router.put('/:categoryId', updateCategoryHandler)
+router.put('/category/:categoryId', updateCategoryHandler)
 router.post('/:categoryId', addQuestionHandler)
 router.delete('/:questionId', deleteQuestionHandler)
-router.put('/:questionId', updateQuestionHandler)
+router.put('/question/:questionId', updateQuestionHandler)
 router.delete('/category/:categoryId', deleteCategoryHandler)
 
 export default router;
